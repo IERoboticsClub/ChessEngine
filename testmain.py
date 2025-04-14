@@ -5,9 +5,11 @@ from basfunc import *
 
 MaxDepth=2
 piece_value={'P':10,'N':30,'B':30,'R':50,'Q':90,'K':1000}
-fenrecord= 10 * ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/"]
+##fenrecord= 10 * ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/"]
 
-
+"""
+functions to  ( maybe ) work with fen reps
+#done
 def GetFen():
     maherstr=""
     global fenrecord
@@ -26,7 +28,9 @@ def GetFen():
         maherstr+='/'
     fenrecord=fenrecord[1:]+[maherstr]
     print(fenrecord)
-            
+    
+
+#still not done        
 def DeFenalizer():
     future_board=[]
     global fenrecord
@@ -41,7 +45,7 @@ def DeFenalizer():
             line+=(int(refboard[i])*"") if (refboard[i]<='8' and refboard[i]>='0') else refboard[i]
             i+=1
             s=i+1
-        
+       """ 
         
         
     
@@ -80,7 +84,7 @@ def basicMinMax(depth, current_turn,alpha,beta):
         return board_score()
     
     if current_turn == 'w':
-        max_score = -5000
+        max_score = -float('inf')
         
         for rank in range(ROWS):
             for file in range(COLS):
@@ -97,16 +101,16 @@ def basicMinMax(depth, current_turn,alpha,beta):
                         move_value = basicMinMax(depth-1, 'b',alpha,beta)
                         
                         undo_move1(state)
-                        max_score = max(max_score, move_value)
-                        alpha=max(alpha,max_score)
+                        alpha=max(alpha,move_value)
                         if beta<=alpha:
-                            return max_score
+                            return alpha
+                        max_score = max(max_score, move_value)
                         
                         
         return max_score
     
     else:
-        min_score = 5000
+        min_score = float('inf')
         
         for rank in range(ROWS):
             for file in range(COLS):
@@ -124,17 +128,17 @@ def basicMinMax(depth, current_turn,alpha,beta):
                         move_value = basicMinMax(depth-1, 'w',alpha,beta)
                         undo_move1(state)
                         
-                        min_score = min(min_score, move_value)
-                        beta=min(beta,min_score)
+                        beta=min(beta,move_value)
                         if beta<=alpha:
-                            return min_score
+                            return beta
+                        min_score = min(min_score, move_value)
                         
                         
                         
         return min_score
     
 def bMMbestmove(current_turn):
-    best_score = -5000 if current_turn == 'w' else 5000
+    best_score = -float('inf') if current_turn == 'w' else float('inf')
     best_move = None
     
     for rank in range(ROWS):
@@ -184,7 +188,7 @@ def bMMbestmove(current_turn):
 
         # 6) Pawn promotion (rare for black but can happen)
         promote_pawn(dest_r, dest_c)
-        GetFen()
+        ##GetFen()
     
     return best_move
                             
@@ -192,6 +196,8 @@ def bMMbestmove(current_turn):
 def switch_turn():
     game_state.current_turn = 'b' if game_state.current_turn == 'w' else 'w'
 
+
+import time
 def main():
     load_piece_images()
     running = True
@@ -201,9 +207,13 @@ def main():
 
         # If it's black's turn AND the game isn't over, black does a random move automatically.
         if game_state.current_turn == 'b' and not game_state.game_over:
+            start_time=time.time()
             best_move = bMMbestmove('b')
+            
             if best_move: 
                 switch_turn()
+                end_time=time.time()
+                print(f"Time for black move:  {end_time-start_time}")
                 check_game_end()
 
         for event in pygame.event.get():
